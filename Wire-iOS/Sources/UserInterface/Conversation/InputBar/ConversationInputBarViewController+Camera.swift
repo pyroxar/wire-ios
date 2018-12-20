@@ -168,13 +168,13 @@ extension ConversationInputBarViewController: CameraKeyboardViewControllerDelega
         confirmImageViewController.transitioningDelegate = FastTransitioningDelegate.sharedDelegate
         confirmImageViewController.image = image
         confirmImageViewController.previewTitle = self.conversation.displayName.uppercased()
-        confirmImageViewController.onConfirm = { [weak self] (editedImage: UIImage?) in ///TODO: weak
+        confirmImageViewController.onConfirm = { [weak self] (editedImage: UIImage?) in
             guard let weakSelf = self else { return }
 
             weakSelf.dismiss(animated: true) {
                 if isFromCamera {
                     let selector = #selector(ConversationInputBarViewController.image(_:didFinishSavingWithError:contextInfo:))
-                    UIImageWriteToSavedPhotosAlbum(UIImage(data: imageData as Data)!, self, selector, nil)
+                    UIImageWriteToSavedPhotosAlbum(UIImage(data: imageData as Data)!, weakSelf, selector, nil)
                 }
                 
                 if let editedImage = editedImage, let editedImageData = editedImage.pngData() {
