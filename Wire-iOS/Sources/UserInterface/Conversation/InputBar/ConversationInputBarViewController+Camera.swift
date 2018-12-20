@@ -101,15 +101,19 @@ extension ConversationInputBarViewController: CameraKeyboardViewControllerDelega
             confirmVideoViewController.transitioningDelegate = FastTransitioningDelegate.sharedDelegate
             confirmVideoViewController.videoURL = videoURL as URL
             confirmVideoViewController.previewTitle = self.conversation.displayName.uppercased()
-            confirmVideoViewController.onConfirm = { [unowned self] (editedImage: UIImage?)in
-                self.dismiss(animated: true, completion: .none)
-                self.uploadFile(at: videoURL as URL)
+            confirmVideoViewController.onConfirm = { [weak self] (editedImage: UIImage?)in
+                guard let weakSelf = self else { return }
+
+                weakSelf.dismiss(animated: true, completion: .none)
+                weakSelf.uploadFile(at: videoURL as URL)
             }
             
-            confirmVideoViewController.onCancel = { [unowned self] in
-                self.dismiss(animated: true) {
-                    self.mode = .camera
-                    self.inputBar.textView.becomeFirstResponder()
+            confirmVideoViewController.onCancel = { [weak self] in
+                guard let weakSelf = self else { return }
+
+                weakSelf.dismiss(animated: true) {
+                    weakSelf.mode = .camera
+                    weakSelf.inputBar.textView.becomeFirstResponder()
                 }
             }
             
@@ -164,25 +168,29 @@ extension ConversationInputBarViewController: CameraKeyboardViewControllerDelega
         confirmImageViewController.transitioningDelegate = FastTransitioningDelegate.sharedDelegate
         confirmImageViewController.image = image
         confirmImageViewController.previewTitle = self.conversation.displayName.uppercased()
-        confirmImageViewController.onConfirm = { [unowned self] (editedImage: UIImage?) in
-            self.dismiss(animated: true) {
+        confirmImageViewController.onConfirm = { [weak self] (editedImage: UIImage?) in ///TODO: weak
+            guard let weakSelf = self else { return }
+
+            weakSelf.dismiss(animated: true) {
                 if isFromCamera {
                     let selector = #selector(ConversationInputBarViewController.image(_:didFinishSavingWithError:contextInfo:))
                     UIImageWriteToSavedPhotosAlbum(UIImage(data: imageData as Data)!, self, selector, nil)
                 }
                 
                 if let editedImage = editedImage, let editedImageData = editedImage.pngData() {
-                    self.sendController.sendMessage(withImageData: editedImageData, completion: .none)
+                    weakSelf.sendController.sendMessage(withImageData: editedImageData, completion: .none)
                 } else {
-                    self.sendController.sendMessage(withImageData: imageData as Data, completion: .none)
+                    weakSelf.sendController.sendMessage(withImageData: imageData as Data, completion: .none)
                 }
             }
         }
         
-        confirmImageViewController.onCancel = { [unowned self] in
-            self.dismiss(animated: true) {
-                self.mode = .camera
-                self.inputBar.textView.becomeFirstResponder()
+        confirmImageViewController.onCancel = { [weak self] in
+            guard let weakSelf = self else { return }
+
+            weakSelf.dismiss(animated: true) {
+                weakSelf.mode = .camera
+                weakSelf.inputBar.textView.becomeFirstResponder()
             }
         }
         
